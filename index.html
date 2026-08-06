@@ -535,3 +535,36 @@
 </script>
 </body>
 </html>
+
+
+<script>
+/* BIA 신청서 → 구글폼 연동 */
+(function(){
+  var GFORM='https://docs.google.com/forms/d/1T-_tK-Fcj7X3xoDj53zCBqWPOs5K82E3fb4ROtu1-A0/formResponse';
+  var MAP={
+    '1부 · 오전반 (10:00~11:30)':'1부 오전반 (10:00~11:30)',
+    '2부 · 오후반 (12:00~13:30)':'2부 오후반 (12:00~13:30)',
+    '상담 후 결정':'상담 후 결정'
+  };
+  window.submitForm=function(){
+    var nm=document.getElementById('nm');
+    var ph=document.getElementById('ph');
+    var cl=document.getElementById('cl');
+    var name=(nm&&nm.value||'').trim();
+    var phone=(ph&&ph.value||'').trim();
+    var slot=cl&&cl.value?cl.value:'';
+    if(!name||!phone){ alert('학생 이름과 연락처를 입력해 주세요.'); if(nm&&!name){nm.focus();}else if(ph){ph.focus();} return false; }
+    var slotVal=MAP[slot]||slot||'상담 후 결정';
+    var body=new URLSearchParams();
+    body.append('entry.2048913945', name);
+    body.append('entry.950331563', phone);
+    body.append('entry.442552947', slotVal);
+    try{ fetch(GFORM,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()}); }catch(e){}
+    var fi=document.getElementById('formInner');
+    var th=document.getElementById('thanks');
+    if(fi){ fi.style.display='none'; }
+    if(th){ th.style.display='block'; th.removeAttribute('hidden'); th.classList&&th.classList.remove('hidden'); }
+    return false;
+  };
+})();
+</script>
