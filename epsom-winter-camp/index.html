@@ -688,9 +688,9 @@
               </select><span class="err">나이를 선택해 주세요.</span></div>
             <div class="f full"><label>희망 캠프 <i>*</i></label>
               <div class="chips" role="radiogroup">
-                <input type="radio" name="camp" id="fc1" value="Camp 1 (2주, 1/10–1/22)"><label for="fc1">Camp 1 · 2주</label>
-                <input type="radio" name="camp" id="fc2" value="Signature Camp (4주, 1/10–2/3)"><label for="fc2">Signature · 4주</label>
-                <input type="radio" name="camp" id="fc3" value="상담 후 결정" checked><label for="fc3">상담 후 결정</label>
+                <input type="radio" name="fcamp" id="fc1" value="Camp 1 (2주, 1/10–1/22)"><label for="fc1">Camp 1 · 2주</label>
+                <input type="radio" name="fcamp" id="fc2" value="Signature Camp (4주, 1/10–2/3)"><label for="fc2">Signature · 4주</label>
+                <input type="radio" name="fcamp" id="fc3" value="상담 후 결정" checked><label for="fc3">상담 후 결정</label>
               </div></div>
             <div class="f full"><label>관심 있는 혜택</label>
               <div class="chips">
@@ -740,12 +740,15 @@
 <script>
 /* ============================================================
    신청서 접수 연동 설정
-   - 구글폼으로 접수하려면 FORM_ENDPOINT 에 .../formResponse 주소를,
-     FIELDS 에 각 항목의 entry ID 를 넣으세요.
-   - 비워두면 신청 내용을 문자/카카오톡으로 보내도록 안내합니다.
+   - 신청서는 FormSubmit(https://formsubmit.co)을 통해 아래 Gmail 로 전송됩니다.
+   - 최초 1회: 첫 신청이 들어오면 FormSubmit 이 이 주소로 '활성화(Activate)' 메일을
+     보냅니다. 메일의 버튼을 눌러야 이후 신청서가 정상 수신됩니다.
+   - 활성화 후 받은 난수 주소(예: 'a1b2c3...')로 NOTIFY_EMAIL 을 바꾸면
+     페이지 소스에 이메일이 노출되지 않습니다.
+   - 전송에 실패하면 문자/카카오톡으로 보내는 화면이 자동으로 표시됩니다.
    ============================================================ */
-var FORM_ENDPOINT = '';
-var FIELDS = { parent:'', phone:'', student:'', age:'', camp:'', benefit:'', message:'' };
+var NOTIFY_EMAIL = 'busanivyacademy2025@gmail.com';
+var FORM_ENDPOINT = 'https://formsubmit.co/ajax/' + NOTIFY_EMAIL;
 var CONTACT_SMS = '01048223528';
 var EARLY_BIRD_END = new Date('2026-11-30T23:59:59+09:00');
 
@@ -812,17 +815,20 @@ var EARLY_BIRD_END = new Date('2026-11-30T23:59:59+09:00');
     var ok=setErr('pn',!pn) & setErr('ph',!/^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(ph.replace(/\s/g,''))) & setErr('sn',!sn) & setErr('ag',!ag);
     if(!ok){var f=form.querySelector('.invalid input,.invalid select');if(f)f.focus();return}
     if(!document.getElementById('agree').checked){alert('개인정보 수집·이용에 동의해 주세요.');return}
-    var camp=val('camp'), bens=[].map.call(form.querySelectorAll('input[name=benefit]:checked'),function(i){return i.value}).join(', ');
+    var camp=val("fcamp"), bens=[].map.call(form.querySelectorAll('input[name=benefit]:checked'),function(i){return i.value}).join(', ');
     var data={parent:pn,phone:ph,student:sn,age:ag,camp:camp,benefit:bens,message:form.message.value.trim()};
     var summary='[엡솜 겨울캠프 상담 신청]\n학부모: '+pn+'\n연락처: '+ph+'\n학생: '+sn+' ('+ag+')\n희망 캠프: '+camp+(bens?'\n관심 혜택: '+bens:'')+(data.message?'\n문의: '+data.message:'');
 
-    if(FORM_ENDPOINT){
-      var body=new URLSearchParams();
-      Object.keys(FIELDS).forEach(function(k){if(FIELDS[k])body.append(FIELDS[k],data[k]||'')});
-      try{fetch(FORM_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()})}catch(err){}
-    } else {
+    var btn=form.querySelector('.submit'), btnHTML=btn.innerHTML;
+    btn.disabled=true; btn.textContent='전송 중...';
+    function done(){
+      document.getElementById('formInner').style.display='none';
+      document.getElementById('thanks').style.display='block';
+      document.getElementById('apply').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    function fallback(){
       document.getElementById('thanks').querySelector('h3').textContent='신청 내용이 작성되었습니다';
-      document.getElementById('thanksMsg').textContent='아래 버튼으로 신청 내용을 보내주시면 접수가 완료됩니다. (카카오톡은 내용이 자동 복사됩니다)';
+      document.getElementById('thanksMsg').textContent='일시적으로 온라인 접수가 원활하지 않습니다. 아래 버튼으로 신청 내용을 보내주시면 접수가 완료됩니다. (카카오톡은 내용이 자동 복사됩니다)';
       var sum=document.getElementById('sum'); sum.textContent=summary; sum.hidden=false;
       document.getElementById('acts').hidden=false;
       var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?'&':'?';
@@ -830,10 +836,21 @@ var EARLY_BIRD_END = new Date('2026-11-30T23:59:59+09:00');
       document.getElementById('kakaoBtn').addEventListener('click',function(){
         if(navigator.clipboard){navigator.clipboard.writeText(summary).catch(function(){})}
       });
+      done();
     }
-    document.getElementById('formInner').style.display='none';
-    document.getElementById('thanks').style.display='block';
-    document.getElementById('apply').scrollIntoView({behavior:'smooth',block:'start'});
+    if(!FORM_ENDPOINT||!window.fetch){fallback();return}
+    fetch(FORM_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        _subject:'[엡솜 겨울캠프] 상담·예약 신청 - '+sn+' ('+ag+')',
+        _template:'table', _captcha:'false',
+        '학부모 성함':pn, '연락처':ph, '학생 이름':sn, '학생 나이':ag,
+        '희망 캠프':camp, '관심 혜택':bens||'-', '문의 사항':data.message||'-',
+        '접수 시각':new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})
+      })})
+      .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return r.ok&&String(j.success)!=='false'})})
+      .then(function(ok){ok?done():fallback()})
+      .catch(fallback)
+      .then(function(){btn.disabled=false;btn.innerHTML=btnHTML});
   });
   ['pn','ph','sn','ag'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){this.closest('.f').classList.remove('invalid')})});
 })();
