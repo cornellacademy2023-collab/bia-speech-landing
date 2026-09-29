@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>신청자 관리 | 렉사 캠퍼스 설명회</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --bg:#f1f0ee; --card:#fff; --ink:#23262b; --ink-2:#3b3f46; --muted:#7c7f85; --faint:#a3a5a9; --line:#dcdad6;
+    --blue:#1e82c4; --blue-deep:#166aa3; --red:#d0463b;
+    --sans:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;letter-spacing:-.01em;word-break:keep-all;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  header{position:sticky;top:0;z-index:10;background:rgba(241,240,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+  header img{height:16px;width:auto;display:block}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand span{font-size:13px;font-weight:700;color:var(--muted);padding-left:10px;border-left:1px solid var(--line)}
+  .hdr-actions{display:flex;gap:8px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;border-radius:10px;border:0;font:600 14px var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-deep)}
+  .btn-line{background:#fff;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+  .btn-line:hover{box-shadow:inset 0 0 0 1px var(--ink-2)}
+  .btn[disabled]{opacity:.55;cursor:progress}
+
+  /* login */
+  .login{min-height:calc(100vh - 60px);display:grid;place-items:center;padding:40px 0}
+  .login-card{width:100%;max-width:380px;background:var(--card);border-radius:20px;padding:36px 30px;box-shadow:0 30px 60px -40px rgba(35,38,43,.4)}
+  .login-card h1{font-size:24px;font-weight:800;letter-spacing:-.03em}
+  .login-card p{margin-top:6px;color:var(--muted);font-size:14.5px}
+  .login-card input{margin-top:22px;width:100%;height:52px;border-radius:12px;border:1px solid var(--line);padding:0 16px;font:600 17px var(--sans);letter-spacing:.1em;outline:none}
+  .login-card input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(30,130,196,.14)}
+  .login-card .btn{width:100%;height:52px;margin-top:12px;font-size:16px;border-radius:12px}
+  .login-card .err{margin-top:10px;color:var(--red);font-size:14px;min-height:1.3em}
+  .login-card .back{display:block;margin-top:18px;text-align:center;color:var(--muted);font-size:13.5px}
+
+  /* dashboard */
+  .dash{display:none;padding:28px 0 60px}
+  .title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .title-row h1{font-size:28px;font-weight:800;letter-spacing:-.035em}
+  .title-row p{color:var(--muted);font-size:14px;margin-top:2px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:20px}
+  .stat{background:var(--card);border-radius:14px;padding:14px 16px}
+  .stat span{display:block;font-size:12.5px;color:var(--muted)}
+  .stat b{display:block;margin-top:2px;font-size:24px;font-weight:800;letter-spacing:-.02em}
+  .stat.main{background:var(--ink);color:#fff}
+  .stat.main span{color:rgba(255,255,255,.6)}
+  .tools{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+  .tools input,.tools select{height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 12px;font:500 14.5px var(--sans);outline:none}
+  .tools input{flex:1 1 220px}
+  .tools input:focus,.tools select:focus{border-color:var(--blue)}
+  .table-wrap{margin-top:14px;background:var(--card);border-radius:16px;overflow:auto}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #eeece8;vertical-align:top}
+  th{font-size:12.5px;font-weight:700;color:var(--muted);background:#faf9f7;position:sticky;top:0;white-space:nowrap}
+  td{font-size:14.5px}
+  tr:last-child td{border-bottom:0}
+  td.no{color:var(--faint);font-variant-numeric:tabular-nums;width:48px}
+  td.time{white-space:nowrap;color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums}
+  td.name{font-weight:700;white-space:nowrap}
+  td.phone a{color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap}
+  td.msg{max-width:280px;color:var(--ink-2);white-space:pre-wrap}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap;background:#eef4f9;color:var(--blue-deep)}
+  .tag.t2{background:#f3eefb;color:#6a44b0}
+  .tag.t3{background:#eaf6ef;color:#23794a}
+  .tag.t4{background:#f1f0ee;color:var(--muted)}
+  .del{border:0;background:none;color:var(--faint);cursor:pointer;font:500 13px var(--sans);padding:4px}
+  .del:hover{color:var(--red)}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+  .note{margin-top:14px;font-size:13px;color:var(--muted)}
+  @media (max-width:900px){ .stats{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:560px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .brand span{display:none}
+    .title-row h1{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/logo.png" alt="LEXA CAMPUS"><span>관리자</span></a>
+    <div class="hdr-actions">
+      <a class="btn btn-line" href="/">랜딩페이지</a>
+      <button class="btn btn-line" id="logout" type="button" hidden>로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="login" id="login">
+    <form class="login-card" id="loginForm">
+      <h1>신청자 확인</h1>
+      <p>렉사 캠퍼스 설명회 · 관리자 전용 페이지입니다.</p>
+      <input type="password" id="pw" inputmode="numeric" autocomplete="current-password" placeholder="비밀번호" aria-label="비밀번호" required>
+      <button class="btn btn-dark" type="submit" id="loginBtn">확인</button>
+      <p class="err" id="loginErr" role="alert"></p>
+      <a class="back" href="/">← 랜딩페이지로 돌아가기</a>
+    </form>
+  </section>
+
+  <section class="dash wrap" id="dash">
+    <div class="title-row">
+      <div>
+        <h1>설명회 신청자 명단</h1>
+        <p>9월 30일(수) 오전 10:30 · 부경대학교 미래관 2층 · <span id="updated"></span></p>
+      </div>
+      <div class="hdr-actions">
+        <button class="btn btn-line" id="refresh" type="button">↻ 새로고침</button>
+        <button class="btn btn-blue" id="csv" type="button">엑셀(CSV) 다운로드</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat main"><span>신청 건수</span><b id="sTotal">0</b></div>
+      <div class="stat"><span>예상 참석 인원</span><b id="sPeople">0</b></div>
+      <div class="stat"><span>강사·원장</span><b id="sR1">0</b></div>
+      <div class="stat"><span>학부모</span><b id="sR2">0</b></div>
+      <div class="stat"><span>학생</span><b id="sR3">0</b></div>
+      <div class="stat"><span>기타</span><b id="sR4">0</b></div>
+    </div>
+
+    <div class="tools">
+      <input type="search" id="q" placeholder="이름 · 연락처 · 소속 검색">
+      <select id="roleFilter" aria-label="참석 구분">
+        <option value="">전체 구분</option>
+        <option>강사·원장</option><option>학부모</option><option>학생</option><option>기타</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>No</th><th>신청 시각</th><th>구분</th><th>이름</th><th>연락처</th><th>소속</th><th>인원</th><th>이메일</th><th>궁금한 점</th><th></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden>아직 신청자가 없습니다.</div>
+    </div>
+    <p class="note">※ 이 페이지는 이후 들어온 신청부터 기록됩니다. 신청자 개인정보가 담겨 있으니 외부에 공유하지 마세요.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var KEY = 'lexaAdminPw';
+  var rows = [];
+  var $ = function(id){ return document.getElementById(id); };
+  function store(v){ try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch(e){} }
+  function saved(){ try { return sessionStorage.getItem(KEY) || ''; } catch(e){ return ''; } }
+  var pw = saved();
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmt(iso){
+    var d = new Date(iso); if (isNaN(d)) return '';
+    return d.toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false});
+  }
+  function people(c){ var n = parseInt(c, 10); return isNaN(n) ? 1 : n; }
+  var TAG = {'강사·원장':'', '학부모':'t2', '학생':'t3', '기타':'t4'};
+
+  function load(){
+    var btn = $('refresh'); btn.disabled = true;
+    return fetch('/api/registrations', { headers: {'x-admin-password': pw}, cache: 'no-store' })
+      .then(function(r){
+        if (r.status === 401) throw new Error('auth');
+        if (!r.ok) throw new Error('server');
+        return r.json();
+      })
+      .then(function(j){
+        rows = j.rows || [];
+        $('login').style.display = 'none'; $('dash').style.display = 'block'; $('logout').hidden = false;
+        $('updated').textContent = new Date().toLocaleTimeString('ko-KR', {timeZone:'Asia/Seoul', hour:'2-digit', minute:'2-digit'}) + ' 기준';
+        render();
+      })
+      .finally(function(){ btn.disabled = false; });
+  }
+
+  function filtered(){
+    var q = $('q').value.trim().toLowerCase().replace(/-/g,''), rf = $('roleFilter').value;
+    return rows.filter(function(r){
+      if (rf && r.role !== rf) return false;
+      if (!q) return true;
+      return [r.name, r.phone, r.org, r.email].join(' ').toLowerCase().replace(/-/g,'').indexOf(q) >= 0;
+    });
+  }
+
+  function render(){
+    var count = {'강사·원장':0,'학부모':0,'학생':0,'기타':0}, ppl = 0;
+    rows.forEach(function(r){ if (count[r.role] != null) count[r.role]++; ppl += people(r.count); });
+    $('sTotal').textContent = rows.length; $('sPeople').textContent = ppl;
+    $('sR1').textContent = count['강사·원장']; $('sR2').textContent = count['학부모']; $('sR3').textContent = count['학생']; $('sR4').textContent = count['기타'];
+
+    var list = filtered(), total = list.length;
+    $('tbody').innerHTML = list.map(function(r, i){
+      return '<tr>' +
+        '<td class="no">' + (total - i) + '</td>' +
+        '<td class="time">' + esc(fmt(r.createdAt)) + '</td>' +
+        '<td><span class="tag ' + (TAG[r.role] || 't4') + '">' + esc(r.role) + '</span></td>' +
+        '<td class="name">' + esc(r.name) + '</td>' +
+        '<td class="phone"><a href="tel:' + esc(String(r.phone).replace(/\D/g,'')) + '">' + esc(r.phone) + '</a></td>' +
+        '<td>' + esc(r.org || '-') + '</td>' +
+        '<td>' + esc(r.count || '1명') + '</td>' +
+        '<td>' + esc(r.email || '-') + '</td>' +
+        '<td class="msg">' + esc(r.msg || '-') + '</td>' +
+        '<td><button class="del" type="button" data-p="' + esc(r.pathname) + '" data-n="' + esc(r.name) + '">삭제</button></td>' +
+      '</tr>';
+    }).join('');
+    $('empty').hidden = rows.length > 0;
+  }
+
+  $('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    pw = $('pw').value.trim(); $('loginErr').textContent = '';
+    $('loginBtn').disabled = true;
+    load().then(function(){ store(pw); })
+      .catch(function(err){ $('loginErr').textContent = err.message === 'auth' ? '비밀번호가 올바르지 않습니다.' : '불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'; $('pw').select(); })
+      .finally(function(){ $('loginBtn').disabled = false; });
+  });
+
+  $('logout').addEventListener('click', function(){ store(''); pw = ''; location.reload(); });
+  $('refresh').addEventListener('click', function(){ load().catch(function(){ alert('불러오지 못했습니다.'); }); });
+  $('q').addEventListener('input', render);
+  $('roleFilter').addEventListener('change', render);
+
+  $('tbody').addEventListener('click', function(e){
+    var b = e.target.closest('.del'); if (!b) return;
+    if (!confirm(b.dataset.n + ' 님의 신청을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    fetch('/api/registrations?pathname=' + encodeURIComponent(b.dataset.p), { method:'DELETE', headers:{'x-admin-password': pw} })
+      .then(function(r){ if (!r.ok) throw 0; return load(); })
+      .catch(function(){ alert('삭제하지 못했습니다.'); });
+  });
+
+  $('csv').addEventListener('click', function(){
+    var head = ['No','신청 시각','구분','이름','연락처','소속','참석 인원','이메일','궁금한 점'];
+    var list = filtered(), n = list.length;
+    var lines = [head].concat(list.map(function(r, i){
+      return [n - i, fmt(r.createdAt), r.role, r.name, r.phone, r.org, r.count, r.email, r.msg];
+    })).map(function(cols){
+      return cols.map(function(v){ v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }).join(',');
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '렉사캠퍼스_설명회_신청자_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  if (pw) load().catch(function(){ store(''); pw = ''; });
+  else $('pw').focus();
+})();
+</script>
+</body>
+</html>

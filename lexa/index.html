@@ -47,6 +47,10 @@
   .brand small{font-size:13px;color:var(--muted);white-space:nowrap}
   .top-cta{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;white-space:nowrap;transition:background .2s}
   .top-cta:hover{background:var(--blue)}
+  .top-right{display:flex;align-items:center;gap:8px}
+  .admin-link{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;background:#fff;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line);font-size:13.5px;font-weight:600;white-space:nowrap;transition:box-shadow .2s,color .2s}
+  .admin-link:hover{color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+  .admin-link svg{width:14px;height:14px;flex:none}
 
   /* hero */
   .hero{padding:clamp(40px,7vw,88px) 0 clamp(56px,8vw,104px);position:relative}
@@ -183,6 +187,7 @@
     .pc{display:none}
     .brand small,.brand .dot{display:none}
     .top-cta{display:none}
+    .admin-link{height:34px;padding:0 12px;font-size:13px}
     .when{padding:14px 20px}
     .when .sep{margin:0 14px}
     .hero-actions .btn{flex:1 1 100%}
@@ -206,7 +211,10 @@
       <img src="assets/logo.png" alt="LEXA CAMPUS" width="700" height="106">
       <i class="dot"></i><small>내신 영어 솔루션</small>
     </a>
-    <a class="top-cta" href="#apply">참가 신청 →</a>
+    <div class="top-right">
+      <a class="admin-link" href="/admin/" title="관리자 전용 · 비밀번호 필요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>신청자 확인</a>
+      <a class="top-cta" href="#apply">참가 신청 →</a>
+    </div>
   </div>
 </header>
 
@@ -471,10 +479,18 @@
     if (data['이메일'] !== '-') data['_replyto'] = data['이메일'];
 
     btn.disabled = true; btn.textContent = '접수 중…';
-    fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify(data) })
-      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ return {ok:r.ok, j:j}; }); })
+    // 1) 신청자 명단 저장(관리자 페이지에서 확인) 2) 메일 알림(FormSubmit) — 명단 저장이 성공하면 접수 완료로 처리
+    var record = { role: role, name: name, phone: phone, org: form.org.value.trim(), count: form.count.value,
+                   email: form.email.value.trim(), msg: form.msg.value.trim(), agree: true };
+    var mail = fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify(data) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ return r.ok && String(j.success) !== 'false'; }); })
+      .catch(function(){ return false; });
+    var saveReq = fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(record) })
+      .then(function(r){ return r.ok; }).catch(function(){ return false; });
+    Promise.all([saveReq, mail])
+      .then(function(res){ return { ok: res[0] || res[1] }; })
       .then(function(res){
-        if (!res.ok || String(res.j.success) === 'false') throw new Error(res.j.message || 'fail');
+        if (!res.ok) throw new Error('fail');
         form.style.display = 'none';
         document.getElementById('summary').innerHTML =
           ['참석 구분','이름','연락처','참석 인원'].map(function(k){ return '<div><span>'+k+'</span><b>'+String(data[k]).replace(/[<>&]/g,'')+'</b></div>'; }).join('');
